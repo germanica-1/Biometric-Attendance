@@ -4,15 +4,21 @@ from functools import partial
 import sys
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the script directory
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR, "..", "..")))  # Adjust path to include `src`
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-from script.backend.login_service import loginuser  # loginuser function from backend
+from script.backend.login_service import loginuser  # Ensure this import works before building
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(
     r"C:\Users\Krypton\Desktop\projects\Biometric Attendance\assets\frame0"
 )
 
+# Correct asset path for PyInstaller
+if getattr(sys, 'frozen', False):  # If running as an EXE
+    BASE_DIR = sys._MEIPASS  # Temporary folder where PyInstaller unpacks files
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
