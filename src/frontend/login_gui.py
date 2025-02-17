@@ -11,7 +11,7 @@ sys.path.append(BASE_DIR)
 
 from src.backend.login_service import (
     loginuser,
-)  # Ensure this import works before building
+)  # import for loginuser function from login_Service.py
 
 
 class LoginGUI:
@@ -20,13 +20,14 @@ class LoginGUI:
         self.BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         if getattr(sys, "frozen", False):  # If running as an EXE
             self.BASE_DIR = (
-                sys._MEIPASS
-            )  # Temporary folder where PyInstaller unpacks files
+                sys._MEIPASS # Temporary folder where PyInstaller unpacks files
+            )
+            #Access assets folder
         self.ASSETS_PATH = Path(self.BASE_DIR) / Path(
             r"C:\Users\Krypton\Desktop\projects\Biometric Attendance\assets\frame0"
         )
 
-        # Initialize Tkinter
+        # Initialize Tkinter wubdiw
         self.window = Tk()
         self.window.geometry("1440x800")
         self.window.title("Admin Login")

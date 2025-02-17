@@ -17,7 +17,7 @@ trial_no = 0
 def trial(window):
     global trial_no
     trial_no += 1
-    print("Trial #", trial_no)
+    messagebox.showwarning("Warning!", f"Attempted Login: {trial_no}")
 
     if trial_no == 3:
         messagebox.showwarning("Warning!", "You have reached the login limit")
