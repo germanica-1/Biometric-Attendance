@@ -1,7 +1,6 @@
 import sys
 import os
 from src.frontend.login_gui import LoginGUI  # Import the class
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 
 

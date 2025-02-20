@@ -2,6 +2,9 @@ import mysql.connector
 from dotenv import load_dotenv
 import os
 from tkinter import messagebox
+from PyQt5 import QtWidgets
+from src.frontend.admin_gui import admin_panel
+
 
 # Load database environment variables
 dotenv_path = os.path.join(
@@ -11,6 +14,17 @@ load_dotenv(dotenv_path=dotenv_path)
 
 # Global trial counter
 trial_no = 0
+
+
+class AdminPanelWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = admin_panel()
+        self.ui.setupUi(self)
+
+    def run(self):
+        """Launch the admin panel window."""
+        self.show()
 
 
 # exit window after attempted login trials
@@ -63,3 +77,14 @@ def loginuser(username, password, window):
     else:
         messagebox.showinfo("Login", "Successfully Logged In")
         window.destroy()
+        print("Opening admin panel...")
+        app = admin_panel()
+        # Ensure QApplication is running
+        app = QtWidgets.QApplication.instance()
+        if app is None:
+            app = QtWidgets.QApplication([])
+
+        admin_window = AdminPanelWindow()  # Create the admin panel window
+        admin_window.run()
+        app.exec_()  # Start the event loop if not already running
+        
