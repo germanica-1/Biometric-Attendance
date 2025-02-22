@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
-from src.frontend.admin_gui import admin_panel
+from src.frontend.admin_panel import admin_panel
 import pymysql
 import sys
 
@@ -24,7 +24,6 @@ class AdminPanelWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Admin Panel")
         self.ui.setupUi(self)  # Pass self (QMainWindow) to setup the UI correctly
         self.resize(900, 700)
-        print("window created")
         
 # Function to handle login attempts
 def trial(window):
@@ -64,7 +63,6 @@ def loginuser(username, password, window):
         return
 
     try:
-        print("error3")
         # Execute the SQL query
         command = "SELECT * FROM login WHERE Username = %s AND Password = %s"
         mycursor.execute(command, (username, password))
@@ -79,9 +77,13 @@ def loginuser(username, password, window):
             # Successful login
             QMessageBox.information(window, "Login Successful", "Welcome!")
             print("Switching to admin panel...")
+            print("Login Successful!")
+            print(f"User ID: {myresult.get('user', 'N/A')}")
+            print(f"Username: {myresult.get('Username', 'N/A')}")
+            print(f"Password: {myresult.get('Password', 'N/A')}")
+            print(f"Pin Admin: {myresult.get('pin_admin', 'N/A')}")
 
             # Hide login window and open admin panel
-            print("error4")
             window.hide()
 
             if not hasattr(QtWidgets.QApplication.instance(), "admin_window") or QtWidgets.QApplication.instance().admin_window is None:
@@ -102,4 +104,4 @@ def loginuser(username, password, window):
         if mydb:
             mycursor.close()
             mydb.close()
-            print("✅ Database connection closed")
+            print("Database connection closed")
