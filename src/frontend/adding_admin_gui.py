@@ -1,9 +1,11 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+    QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
 )
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+from src.backend.adding_admin_service import add_admin
+
 
 
 class AddAdminPanel(QWidget):
@@ -63,6 +65,8 @@ class AddAdminPanel(QWidget):
         add_btn = QPushButton('ADD')
         add_btn.setFont(QFont('Times New Roman', 12, QFont.Bold))
         add_btn.setFixedSize(120, 40)
+        add_btn.clicked.connect(self.handle_add_admin)
+        
 
         # Layout
         layout = QVBoxLayout()
@@ -80,11 +84,29 @@ class AddAdminPanel(QWidget):
         layout.addWidget(add_btn, alignment=Qt.AlignCenter)
         layout.addStretch()
 
+
         self.setLayout(layout)
 
         # Disable Maximize Button
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)
-        
+
+    def handle_add_admin(self):
+        user_id = self.user_id_input.text().strip()
+        username = self.username_input.text().strip()
+        password = self.password_input.text().strip()
+        pin = self.pin_input.text().strip()
+        confirm_pin = self.confirm_pin_input.text().strip()
+
+        success, message = add_admin(user_id, username, password, pin, confirm_pin)
+        self.show_message('Success' if success else 'Error', message)
+
+    def show_message(self, title, message):
+        msg = QMessageBox()
+        msg.setWindowTitle(title)
+        msg.setText(message)
+        msg.exec_()
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = AddAdminPanel()

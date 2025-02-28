@@ -53,3 +53,4 @@ def load_data(self):
         # Close the cursor and connection
         mycursor.close()
         mydb.close()
+

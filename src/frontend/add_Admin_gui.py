@@ -165,6 +165,7 @@ class add_admin(object):
                 self.tableWidget.setItem(row_idx, col_idx, item)
 
         self.tableWidget.resizeRowsToContents()
+        self.tableWidget.viewport().update()  # Force GUI update
 
 
     def adding_admin(self):
