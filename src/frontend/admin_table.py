@@ -1,6 +1,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from src.backend.add_Admin_service import load_data 
+from src.backend.admin_table_service import load_data 
 from src.frontend.adding_admin_gui import AddAdminPanel
 from PyQt5.QtWidgets import QApplication
 
@@ -24,6 +24,7 @@ class add_admin(object):
         font.setPointSize(20)
         self.Search.setFont(font)
         self.Search.setStyleSheet("background-color: white;")
+        self.Search.setText("Refresh")
         self.Search.setObjectName("Search")
 
         self.gridLayout.addWidget(self.Search, 0, 0, 1, 1)
@@ -137,7 +138,7 @@ class add_admin(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.Search.setText(_translate("MainWindow", "Search"))
+        self.Search.setText(_translate("MainWindow", "Refresh"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Username"))
         self.pushButton.setText(_translate("MainWindow", "Add New Admin"))
         self.RemoveADD.setText(_translate("MainWindow", "Remove Admin"))
@@ -165,7 +166,7 @@ class add_admin(object):
                 self.tableWidget.setItem(row_idx, col_idx, item)
 
         self.tableWidget.resizeRowsToContents()
-        self.tableWidget.viewport().update()  # Force GUI update
+
 
 
     def adding_admin(self):

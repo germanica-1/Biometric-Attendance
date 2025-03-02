@@ -1,6 +1,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from src.frontend.add_Admin_gui import add_admin
+from src.frontend.admin_table import add_admin
 
 class admin_panel(object):
     def setupUi(self, MainWindow):
