@@ -3,12 +3,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from src.frontend.admin_table import add_admin
 
 class admin_panel(object):
-    def setupUi(self, MainWindow):
-        self.MainWindow = MainWindow
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(883, 676)
-        MainWindow.setStyleSheet("background-color: rgb(8, 39, 79);")
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+    def setupUi(self, adminWindow):
+        self.adminWindow = adminWindow
+        adminWindow.setObjectName("adminWindow")
+        adminWindow.resize(883, 676)
+        adminWindow.setStyleSheet("background-color: rgb(8, 39, 79);")
+        self.centralwidget = QtWidgets.QWidget(adminWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -88,30 +88,12 @@ class admin_panel(object):
 
         self.Add_employee.setObjectName("Add_employee")
         self.verticalLayout_4.addWidget(self.Add_employee)
-        self.remove_employee = QtWidgets.QPushButton(self.frame_2)
-        self.remove_employee.setMaximumSize(QtCore.QSize(700, 60))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(20)
         font.setBold(True)
         font.setWeight(75)
-        self.remove_employee.setFont(font)
-        self.remove_employee.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(75, 152, 61); \n"
-"    color: rgb(255, 255, 255);\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(75, 160, 61); \n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: rgb(75, 180, 61);\n"
-"}")
-        
 
-        self.remove_employee.setObjectName("remove_employee")
-        self.verticalLayout_4.addWidget(self.remove_employee)
         self.add_Admin = QtWidgets.QPushButton(self.frame_2)
         self.add_Admin.setMaximumSize(QtCore.QSize(700, 60))
         font = QtGui.QFont()
@@ -161,36 +143,34 @@ class admin_panel(object):
         self.Logout_B.setObjectName("Logout_B")
         self.verticalLayout_4.addWidget(self.Logout_B)
         self.verticalLayout_2.addWidget(self.frame_2, 0, QtCore.Qt.AlignHCenter)
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        adminWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(adminWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 883, 21))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        adminWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(adminWindow)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        adminWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(adminWindow)
+        QtCore.QMetaObject.connectSlotsByName(adminWindow)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, adminWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        adminWindow.setWindowTitle(_translate("adminWindow", "Admin Panel"))
         self.label.setText(_translate("MainWindow", "ADMIN CONTROLS"))
         self.ViewRecords.setText(_translate("MainWindow", "View Records"))
         self.Add_employee.setText(_translate("MainWindow", "Add Employee"))
-        self.remove_employee.setText(_translate("MainWindow", "Remove Employee"))
         self.add_Admin.setText(_translate("MainWindow", "Add New Admin"))
         self.Logout_B.setText(_translate("MainWindow", "Logout"))
 
     def open_add_admin(self):
         """Function to open the Add Admin window."""
-        self.MainWindow.close()
-        self.window = QtWidgets.QMainWindow()  # Create a new window
+        self.adminWindow.close()
+        self.add_admin_window = QtWidgets.QMainWindow()  # Create a new window
         self.ui = add_admin()  # Instantiate the add_admin UI
-        self.ui.setupUi(self.window)  # Set up the UI
-        self.window.show()  # Show the window        
-
+        self.ui.setupUi(self.add_admin_window)  # Set up the UI
+        self.add_admin_window.show()  # Show the window        
 
 if __name__ == "__main__":
     import sys

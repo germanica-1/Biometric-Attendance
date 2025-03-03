@@ -6,11 +6,12 @@ from PyQt5.QtWidgets import QApplication
 
 
 class add_admin(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(909, 565)
-        MainWindow.setStyleSheet("background-color:rgb(8, 39, 79)")
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+    
+    def setupUi(self, AdminTable):
+        AdminTable.setObjectName("Admin Table")
+        AdminTable.resize(909, 565)
+        AdminTable.setStyleSheet("background-color:rgb(8, 39, 79)")
+        self.centralwidget = QtWidgets.QWidget(AdminTable)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -26,6 +27,8 @@ class add_admin(object):
         self.Search.setStyleSheet("background-color: white;")
         self.Search.setText("Refresh")
         self.Search.setObjectName("Search")
+        self.Search.clicked.connect(self.load_data)
+
 
         self.gridLayout.addWidget(self.Search, 0, 0, 1, 1)
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
@@ -122,27 +125,26 @@ class add_admin(object):
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.horizontalLayout.addWidget(self.tableWidget)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        AdminTable.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(AdminTable)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 909, 21))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        AdminTable.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(AdminTable)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        AdminTable.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        load_data(self)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(AdminTable)
+        QtCore.QMetaObject.connectSlotsByName(AdminTable)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, AdminTable):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        AdminTable.setWindowTitle(_translate("AdminTable", "AdminTable"))
         self.Search.setText(_translate("MainWindow", "Refresh"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Username"))
         self.pushButton.setText(_translate("MainWindow", "Add New Admin"))
         self.RemoveADD.setText(_translate("MainWindow", "Remove Admin"))
-        self.Exit.setText(_translate("MainWindow", "Exit"))
+        self.Exit.setText(_translate("MainWindow", "Back"))
 
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "user"))
@@ -155,7 +157,7 @@ class add_admin(object):
 
     def load_data(self):
         """ Fetch and display admin data. """
-        admins = load_data()  # Call the function directly
+        admins = load_data(self.tableWidget)  # Call the function directly
         self.tableWidget.setRowCount(len(admins))
         row_height = 70
         for row_idx, row in enumerate(admins):

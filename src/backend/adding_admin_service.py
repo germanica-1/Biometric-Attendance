@@ -2,15 +2,16 @@ import pymysql
 import os
 from PyQt5.QtWidgets import QMessageBox
 
-def add_admin(user_id, username, password, pin, confirm_pin):
+
+
+def add_admin(user_id, username, password, pin):
     if not user_id.isdigit():
         return False, "UserID must be an integer"
     if not username or not password:
         return False, "Username and Password cannot be empty"
     if not pin.isdigit() or len(pin) != 4:
         return False, "Admin Pin must be a 4-digit number"
-    if confirm_pin != '1234':  # Replace with actual admin validation logic
-        return False, "Invalid Admin Confirmation Pin"
+    
 
     try:
         mydb = pymysql.connect(

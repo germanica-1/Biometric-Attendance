@@ -15,7 +15,7 @@ class AddAdminPanel(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Add New Admin')
-        self.setFixedSize(350, 450)  # Set a fixed window size
+        self.setFixedSize(350, 370)  # Set a fixed window size
 
         # Title Label
         title = QLabel('NEW ADMIN', self)
@@ -52,15 +52,6 @@ class AddAdminPanel(QWidget):
         self.pin_input.setFont(QFont('Times New Roman', 15))
         self.pin_input.setPlaceholderText("Must be an integer (4)")
 
-        # Confirm Pin
-        confirm_label = QLabel('ADMIN PIN TO CONFIRM ADDING', self)
-        confirm_label.setFont(QFont('Times New Roman', 12, QFont.Bold))
-        confirm_label.setAlignment(Qt.AlignCenter)
-
-        self.confirm_pin_input = QLineEdit()
-        self.confirm_pin_input.setFixedSize(200, 30)
-        self.confirm_pin_input.setFont(QFont('Times New Roman', 15))
-
         # Add Button
         add_btn = QPushButton('ADD')
         add_btn.setFont(QFont('Times New Roman', 12, QFont.Bold))
@@ -79,8 +70,6 @@ class AddAdminPanel(QWidget):
         layout.addWidget(self.password_input)
         layout.addWidget(pin_label)
         layout.addWidget(self.pin_input)
-        layout.addWidget(confirm_label)
-        layout.addWidget(self.confirm_pin_input, alignment=Qt.AlignCenter)
         layout.addWidget(add_btn, alignment=Qt.AlignCenter)
         layout.addStretch()
 
@@ -95,9 +84,8 @@ class AddAdminPanel(QWidget):
         username = self.username_input.text().strip()
         password = self.password_input.text().strip()
         pin = self.pin_input.text().strip()
-        confirm_pin = self.confirm_pin_input.text().strip()
 
-        success, message = add_admin(user_id, username, password, pin, confirm_pin)
+        success, message = add_admin(user_id, username, password, pin)
         self.show_message('Success' if success else 'Error', message)
 
     def show_message(self, title, message):
