@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from src.backend.admin_table_service import load_data 
 from src.frontend.adding_admin_gui import AddAdminPanel
 from PyQt5.QtWidgets import QApplication
+from src.backend.admin_table_service import remove_admin
 
 
 class add_admin(object):
@@ -26,7 +27,7 @@ class add_admin(object):
         self.Search.setFont(font)
         self.Search.setStyleSheet("background-color: white;")
         self.Search.setText("Refresh")
-        self.Search.setObjectName("Search")
+        self.Search.setObjectName("Refresh")
         self.Search.clicked.connect(self.load_data)
 
 
@@ -62,18 +63,21 @@ class add_admin(object):
         self.RemoveADD.setStyleSheet("background-color: white;")
         self.RemoveADD.setObjectName("RemoveADD")
         self.gridLayout.addWidget(self.RemoveADD, 0, 2, 1, 1)
+        self.RemoveADD.clicked.connect(self.handle_remove_admin)
 
-        self.Exit = QtWidgets.QPushButton(self.centralwidget)
-        self.Exit.setMaximumSize(QtCore.QSize(100, 40))
+
+        self.Back = QtWidgets.QPushButton(self.centralwidget)
+        self.Back.setMaximumSize(QtCore.QSize(100, 40))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
         font.setBold(True)
         font.setWeight(75)
-        self.Exit.setFont(font)
-        self.Exit.setStyleSheet("background-color: white;")
-        self.Exit.setObjectName("Exit")
-        self.gridLayout.addWidget(self.Exit, 0, 4, 1, 1)
+        self.Back.setFont(font)
+        self.Back.setStyleSheet("background-color: white;")
+        self.Back.setObjectName("Back")
+        self.gridLayout.addWidget(self.Back, 0, 4, 1, 1)
+        self.Back.clicked.connect(self.go_back)
 
         self.verticalLayout.addLayout(self.gridLayout)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -94,12 +98,14 @@ class add_admin(object):
         font.setFamily("Times New Roman")
         font.setPointSize(16)
         item.setFont(font) #user
+
         self.tableWidget.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
         item.setFont(font) #username
+
         self.tableWidget.setHorizontalHeaderItem(1, item)
         self.tableWidget.verticalHeader().setDefaultSectionSize(40)
         item = QtWidgets.QTableWidgetItem()
@@ -107,12 +113,14 @@ class add_admin(object):
         font.setFamily("Times New Roman")
         font.setPointSize(16)
         item.setFont(font) #password
+
         self.tableWidget.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem() 
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
         item.setFont(font) #admin pin
+
         self.tableWidget.setHorizontalHeaderItem(3, item)
         self.tableWidget.horizontalHeader().setDefaultSectionSize(220)
         self.tableWidget.verticalHeader().setDefaultSectionSize(40)  # Set row height 
@@ -144,7 +152,7 @@ class add_admin(object):
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Username"))
         self.pushButton.setText(_translate("MainWindow", "Add New Admin"))
         self.RemoveADD.setText(_translate("MainWindow", "Remove Admin"))
-        self.Exit.setText(_translate("MainWindow", "Back"))
+        self.Back.setText(_translate("MainWindow", "Back"))
 
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "user"))
@@ -155,9 +163,13 @@ class add_admin(object):
         item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "admin_pin"))
 
+
+    #functions for buttons
+
+    #refresh button
     def load_data(self):
         """ Fetch and display admin data. """
-        admins = load_data(self.tableWidget)  # Call the function directly
+        admins = load_data(self.tableWidget) 
         self.tableWidget.setRowCount(len(admins))
         row_height = 70
         for row_idx, row in enumerate(admins):
@@ -169,14 +181,29 @@ class add_admin(object):
 
         self.tableWidget.resizeRowsToContents()
 
+    #remove admin button
+    def handle_remove_admin(self):
+        """function to call remove_admin with input from lineEdit."""
+        username = self.lineEdit.text()
+        remove_admin(username, self.load_data)  
 
-
+    #adding admin button
     def adding_admin(self):
         """Function to open the Adding Admin window."""
-        self.admin_window = AddAdminPanel()  # Create a new instance of AddAdminPanel
-        self.admin_window.show()  # Show the new window
-
+        self.admin_window = AddAdminPanel() 
+        self.admin_window.show()  
     
+    #back to admin panel button
+    def go_back(self):
+        """Function to return to the Admin Panel."""
+        from src.frontend.admin_panel import admin_panel
+        self.window = QtWidgets.QMainWindow()
+        self.ui = admin_panel()
+        self.ui.setupUi(self.window)
+        self.window.show()
+        QtWidgets.QApplication.instance().activeWindow().close()  
+
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
