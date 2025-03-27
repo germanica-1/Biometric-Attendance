@@ -3,7 +3,6 @@ import os
 from PyQt5.QtWidgets import QMessageBox
 
 
-
 def add_admin(user_id, username, password, pin):
     if not user_id.isdigit():
         return False, "UserID must be an integer"

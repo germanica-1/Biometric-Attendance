@@ -71,8 +71,6 @@ class add_admin(object):
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
-        font.setBold(True)
-        font.setWeight(75)
         self.Back.setFont(font)
         self.Back.setStyleSheet("background-color: white;")
         self.Back.setObjectName("Back")

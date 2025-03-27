@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.frontend.admin_table import add_admin
 
+
 class admin_panel(object):
     def setupUi(self, adminWindow):
         self.adminWindow = adminWindow
@@ -88,6 +89,7 @@ class admin_panel(object):
 
         self.Add_employee.setObjectName("Add_employee")
         self.verticalLayout_4.addWidget(self.Add_employee)
+        self.Add_employee.clicked.connect(self.open_add_employee)
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(20)
@@ -171,6 +173,15 @@ class admin_panel(object):
         self.ui = add_admin()  # Instantiate the add_admin UI
         self.ui.setupUi(self.add_admin_window)  # Set up the UI
         self.add_admin_window.show()  # Show the window        
+
+    def open_add_employee(self):
+        """Function to open the add employee window"""
+        from frontend.employee_table import addEmployee
+        self.adminWindow.close()
+        self.add_employee_window = QtWidgets.QMainWindow()  # Create a new window
+        self.ui = addEmployee() #Instantiate the add_employee UI
+        self.ui.setupUi(self.add_employee_window)  # Set up the UI
+        self.add_employee_window.show() #show window
 
 if __name__ == "__main__":
     import sys
