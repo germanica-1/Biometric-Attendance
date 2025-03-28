@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.frontend.adding_employee_gui import EmployeeWindow
 from src.backend.employee_table_service import load_data
+from src.backend.employee_table_service import remove_employee
 
 class addEmployee(object):
     def setupUi(self, MainWindow):
@@ -38,6 +39,7 @@ class addEmployee(object):
         self.Remove.setStyleSheet("background-color: white;")
         self.Remove.setObjectName("Remove")
         self.gridLayout.addWidget(self.Remove, 0, 2, 1, 1)
+        self.Remove.clicked.connect(self.handle_remove_employee)
 
         self.Add = QtWidgets.QPushButton(self.centralwidget)
         self.Add.setMinimumSize(QtCore.QSize(180, 0))
@@ -81,7 +83,7 @@ class addEmployee(object):
         self.EmployeeTable.setMaximumSize(QtCore.QSize(980, 700))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
-        font.setPointSize(16)
+        font.setPointSize(20)
         self.EmployeeTable.setFont(font)
         self.EmployeeTable.setStyleSheet("background-color: white;")
         self.EmployeeTable.setWordWrap(True)
@@ -149,11 +151,18 @@ class addEmployee(object):
         self.window.show()
         QtWidgets.QApplication.instance().activeWindow().close()  
 
+    #add employee
     def add_employee(self):
         """Function to open the Adding Employee Window."""
         self.add_employee_window = EmployeeWindow() 
         self.add_employee_window.show()  
 
+    #remove admin button
+    def handle_remove_employee(self):
+        """function to call remove_admin with input from lineEdit."""
+        Name = self.Search.text()
+        remove_employee(Name, self.load_data)  
+       
     #refresh button
     def load_data(self):
         """ Fetch and display admin data. """

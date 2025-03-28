@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import (
-     QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout,
+     QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, 
 )
 import os
 from PyQt5.QtGui import QFont
@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 from src.backend.login_service import (
     loginuser,
 )  # import for loginuser function from login_Service.py
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class LoginPanel(QWidget):
     def __init__(self):
@@ -56,6 +56,7 @@ class LoginPanel(QWidget):
         forgot_layout.addWidget(forgot_label)
         forgot_layout.addWidget(reset_btn)
         forgot_layout.addStretch()
+        reset_btn.clicked.connect(self.open_forgot_password)  # Connect to login function
         
         # Submit Button
         submit_btn = QPushButton('LOGIN')
@@ -85,6 +86,14 @@ class LoginPanel(QWidget):
         password = self.pass_input.text()
         # Calls the backend function
         loginuser(username, password, self)        
+
+    def open_forgot_password(self):
+        """Function to open the forgot password window"""
+        from frontend.forgot_passwrod_gui import ResetPasswordPanel
+        self.forgot_password = QtWidgets.QMainWindow()  # Create a new window
+        self.ui = ResetPasswordPanel() #Instantiate the remove password UI
+        self.ui.show() #show window
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,4 +1,3 @@
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.frontend.admin_table import add_admin
 
@@ -143,6 +142,7 @@ class admin_panel(object):
 "}")
         
         self.Logout_B.setObjectName("Logout_B")
+        self.Logout_B.clicked.connect(self.logout_func)
         self.verticalLayout_4.addWidget(self.Logout_B)
         self.verticalLayout_2.addWidget(self.frame_2, 0, QtCore.Qt.AlignHCenter)
         adminWindow.setCentralWidget(self.centralwidget)
@@ -182,6 +182,14 @@ class admin_panel(object):
         self.ui = addEmployee() #Instantiate the add_employee UI
         self.ui.setupUi(self.add_employee_window)  # Set up the UI
         self.add_employee_window.show() #show window
+
+    def logout_func(self):
+        from src.frontend.login_gui import LoginPanel
+        """Function to logout"""
+        self.adminWindow.close()
+        self.logout_Window = QtWidgets.QMainWindow()
+        self.ui = LoginPanel()
+        self.ui.show()  # Directly show the login window
 
 if __name__ == "__main__":
     import sys
