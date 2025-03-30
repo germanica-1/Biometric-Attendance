@@ -4,6 +4,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
+from backend.forgot_password_service import reset_password
+
 
 class ResetPasswordPanel(QWidget):
     def __init__(self):
@@ -45,6 +48,7 @@ class ResetPasswordPanel(QWidget):
         submit_btn = QPushButton('RESET')
         submit_btn.setFont(QFont('Arial', 12, QFont.Bold))
         submit_btn.setFixedSize(150, 40)
+        submit_btn.clicked.connect(self.on_reset_button_clicked)  
 
         # Layout
         layout = QVBoxLayout()
@@ -60,6 +64,22 @@ class ResetPasswordPanel(QWidget):
         layout.addStretch()
 
         self.setLayout(layout)
+
+
+    def on_reset_button_clicked(self):
+        username = self.user_input.text().strip()
+        new_password = self.pass_input.text().strip()
+        admin_pin = self.pin_input.text().strip()
+
+        if not username or not new_password or not admin_pin:
+            QMessageBox.warning(self, "Input Error", "All fields are required.")
+            return
+        
+        success = reset_password(username, new_password, admin_pin)
+        if success:
+            self.user_input.clear()
+            self.pass_input.clear()
+            self.pin_input.clear()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
