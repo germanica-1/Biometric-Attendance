@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
-from backend.forgot_password_service import reset_password
-
 
 class ResetPasswordPanel(QWidget):
     def __init__(self):
@@ -67,6 +65,7 @@ class ResetPasswordPanel(QWidget):
 
 
     def on_reset_button_clicked(self):
+        from src.backend.forgot_password_service import reset_password
         username = self.user_input.text().strip()
         new_password = self.pass_input.text().strip()
         admin_pin = self.pin_input.text().strip()
@@ -74,7 +73,7 @@ class ResetPasswordPanel(QWidget):
         if not username or not new_password or not admin_pin:
             QMessageBox.warning(self, "Input Error", "All fields are required.")
             return
-        
+
         success = reset_password(username, new_password, admin_pin)
         if success:
             self.user_input.clear()

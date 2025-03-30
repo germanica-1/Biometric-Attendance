@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.frontend.admin_table import add_admin
-
+from src.frontend.employee_table import addEmployee
 
 class admin_panel(object):
     def setupUi(self, adminWindow):
@@ -176,7 +176,6 @@ class admin_panel(object):
 
     def open_add_employee(self):
         """Function to open the add employee window"""
-        from frontend.employee_table import addEmployee
         self.adminWindow.close()
         self.add_employee_window = QtWidgets.QMainWindow()  # Create a new window
         self.ui = addEmployee() #Instantiate the add_employee UI
