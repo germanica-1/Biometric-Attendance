@@ -38,70 +38,72 @@ def trial(window):
         window.close()
         
 def loginuser(username, password, window):
-    """Handles the login process, including validation and database authentication."""
-    global trial_no  # Track login attempts globally
+    """Handles the login process with improved password verification."""
+    global trial_no
 
-    # Validate username and password inputs
+    # Input validation
     if not username.strip() or not password.strip():
         QMessageBox.critical(window, "Entry Error", "Please enter both username and password.")
         return
 
     try:
-        # Connect to the database
+        # Database connection
         mydb = pymysql.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor,  # Return results as dictionaries
+            cursorclass=pymysql.cursors.DictCursor,
         )
         mycursor = mydb.cursor()
-        print("Connected to database")
-    except pymysql.MySQLError as err:
-        print(f"Database connection error: {err}")
-        QMessageBox.critical(window, "Connection Error", "Failed to connect to the database.")
-        return
 
-    try:
-        # Execute the SQL query
-        command = "SELECT * FROM login WHERE Username = %s AND Password = %s"
-        mycursor.execute(command, (username, password))
+        # Fetch user by username
+        mycursor.execute("SELECT * FROM login WHERE Username = %s", (username,))
         myresult = mycursor.fetchone()
 
-        if myresult is None:
-            # Invalid credentials
-            QMessageBox.warning(window, "Invalid Credentials", "Incorrect UserID or Password.")
-            trial(window)  # Increment failed attempts
+        if not myresult:
+            QMessageBox.warning(window, "Invalid Credentials", "Username not found.")
+            trial(window)
             return
-        else:
-            # Successful login
-            QMessageBox.information(window, "Login Successful", "Welcome!")
-            print("Switching to admin panel...")
-            print("Login Successful!")
-            print(f"User ID: {myresult.get('user', 'N/A')}")
-            print(f"Username: {myresult.get('Username', 'N/A')}")
-            print(f"Password: {myresult.get('Password', 'N/A')}")
-            print(f"Pin Admin: {myresult.get('pin_admin', 'N/A')}")
 
-            # Hide login window and open admin panel
-            window.hide()
+        stored_hash = myresult['Password']
+        
+        # Flexible password verification
+        from passlib.hash import pbkdf2_sha256
+        try:
+            if pbkdf2_sha256.identify(stored_hash):  # Check if it's a PBKDF2 hash
+                valid = pbkdf2_sha256.verify(password, stored_hash)
+            else:
+                # Fallback for legacy hashes (like bcrypt or plaintext - INSECURE, migrate ASAP)
+                valid = False
+                if stored_hash == password:  # Plain text comparison (INSECURE)
+                    QMessageBox.warning(window, "Security Warning", 
+                                      "Your password is stored insecurely. Please contact admin.")
+                    valid = True
+                
+            if not valid:
+                QMessageBox.warning(window, "Invalid Credentials", "Incorrect password.")
+                trial(window)
+                return
 
-            if not hasattr(QtWidgets.QApplication.instance(), "admin_window") or QtWidgets.QApplication.instance().admin_window is None:
-                window.admin_window = AdminPanelWindow(window)  # Pass parent reference to prevent garbage
-                window.admin_window.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            # Keep a reference to the Admin Panel to prevent it from closing
-            window.admin_window.show()
-            window.admin_window.activateWindow()
-            
-    except mysql.connector.Error as err:
-        print(f"SQL query error: {err}")
-        QMessageBox.critical(window, "Query Error", "An error occurred while checking credentials.")
+        except ValueError as e:
+            QMessageBox.critical(window, "Error", f"Password verification failed: {str(e)}")
+            return
+
+        # Successful login
+        QMessageBox.information(window, "Login Successful", "Welcome!")
+        window.hide()
+        
+        if not hasattr(QtWidgets.QApplication.instance(), "admin_window"):
+            window.admin_window = AdminPanelWindow(window)
+            window.admin_window.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        window.admin_window.show()
+        window.admin_window.activateWindow()
+
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        QMessageBox.critical(window, "Error", "An unexpected error occurred.")
+        QMessageBox.critical(window, "Error", f"An error occurred: {str(e)}")
     finally:
-        # Close the database connection
         if mydb:
             mycursor.close()
             mydb.close()
-            print("Database connection closed")
+

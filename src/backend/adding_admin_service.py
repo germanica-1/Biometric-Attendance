@@ -1,6 +1,5 @@
 import pymysql
 import os
-from PyQt5.QtWidgets import QMessageBox
 
 
 def add_admin(user_id, username, password, pin):
@@ -11,8 +10,15 @@ def add_admin(user_id, username, password, pin):
     if not pin.isdigit() or len(pin) != 4:
         return False, "Admin Pin must be a 4-digit number"
     
-
+    # Initialize variables to None
+    mydb = None
+    cursor = None
+    
     try:
+        # Hash the password with passlib
+        from passlib.hash import pbkdf2_sha256  # Using PBKDF2 with SHA256
+        hashed_password = pbkdf2_sha256.hash(password)
+        
         mydb = pymysql.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
@@ -22,22 +28,28 @@ def add_admin(user_id, username, password, pin):
         )
         cursor = mydb.cursor()
 
-        # Check if the user ID already exists in the 'login' table
+        # Check if the user ID already exists
         cursor.execute("SELECT * FROM login WHERE user = %s", (user_id,))
         if cursor.fetchone():
             return False, "UserID already exists"
 
-        # Insert into the 'login' table using the correct column names
+        # Insert with hashed password
         cursor.execute(
             "INSERT INTO login (user, Username, Password, pin_admin) VALUES (%s, %s, %s, %s)",
-            (user_id, username, password, pin)
+            (user_id, username, hashed_password, pin)
         )
         mydb.commit()
         return True, "Admin added successfully!"
     
     except Exception as e:
+        # Rollback in case of error
+        if mydb:
+            mydb.rollback()
         return False, f"Database Error: {str(e)}"
-
     finally:
-        cursor.close()
-        mydb.close()
+        # Close cursor if it exists
+        if cursor:
+            cursor.close()
+        # Close connection if it exists
+        if mydb:
+            mydb.close()

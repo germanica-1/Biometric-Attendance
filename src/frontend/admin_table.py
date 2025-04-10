@@ -1,4 +1,3 @@
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.backend.admin_table_service import load_data 
 from src.frontend.adding_admin_gui import AddAdminPanel
@@ -29,7 +28,6 @@ class add_admin(object):
         self.Search.setText("Refresh")
         self.Search.setObjectName("Refresh")
         self.Search.clicked.connect(self.load_data)
-
 
         self.gridLayout.addWidget(self.Search, 0, 0, 1, 1)
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
@@ -65,7 +63,6 @@ class add_admin(object):
         self.gridLayout.addWidget(self.RemoveADD, 0, 2, 1, 1)
         self.RemoveADD.clicked.connect(self.handle_remove_admin)
 
-
         self.Back = QtWidgets.QPushButton(self.centralwidget)
         self.Back.setMaximumSize(QtCore.QSize(100, 40))
         font = QtGui.QFont()
@@ -85,43 +82,36 @@ class add_admin(object):
         self.tableWidget.setMaximumSize(QtCore.QSize(980, 700))
         self.tableWidget.setStyleSheet("background-color: white;")
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(4)
+        self.tableWidget.setColumnCount(3)  # Changed to 3 columns (user, username, admin_pin)
         self.tableWidget.resizeRowsToContents()
         font = QtGui.QFont()
-        font.setPointSize(20)  # Adjust as needed
+        font.setPointSize(20)
         self.tableWidget.setFont(font)
 
+        # Set up header items for 3 columns
         item = QtWidgets.QTableWidgetItem()
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
-        item.setFont(font) #user
+        item.setFont(font)
+        self.tableWidget.setHorizontalHeaderItem(0, item)  # user
 
-        self.tableWidget.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
-        item.setFont(font) #username
+        item.setFont(font)
+        self.tableWidget.setHorizontalHeaderItem(1, item)  # username
 
-        self.tableWidget.setHorizontalHeaderItem(1, item)
-        self.tableWidget.verticalHeader().setDefaultSectionSize(40)
         item = QtWidgets.QTableWidgetItem()
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(16)
-        item.setFont(font) #password
+        item.setFont(font)
+        self.tableWidget.setHorizontalHeaderItem(2, item)  # admin_pin
 
-        self.tableWidget.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem() 
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(16)
-        item.setFont(font) #admin pin
-
-        self.tableWidget.setHorizontalHeaderItem(3, item)
         self.tableWidget.horizontalHeader().setDefaultSectionSize(220)
-        self.tableWidget.verticalHeader().setDefaultSectionSize(40)  # Set row height 
+        self.tableWidget.verticalHeader().setDefaultSectionSize(40)
         self.tableWidget.horizontalHeader().setMinimumSectionSize(220)
         self.tableWidget.horizontalHeader().setSortIndicatorShown(False)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -157,41 +147,34 @@ class add_admin(object):
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("MainWindow", "username"))
         item = self.tableWidget.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "password"))
-        item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "admin_pin"))
 
-
-    #functions for buttons
-
-    #refresh button
     def load_data(self):
-        """ Fetch and display admin data. """
+        """Fetch and display admin data without password column."""
         admins = load_data(self.tableWidget) 
         self.tableWidget.setRowCount(len(admins))
         row_height = 70
         for row_idx, row in enumerate(admins):
-            self.tableWidget.setRowHeight(row_idx, row_height)  
-            for col_idx, data in enumerate(row.values()):
-                item = QtWidgets.QTableWidgetItem(str(data))
-                item.setTextAlignment(QtCore.Qt.AlignCenter)
-                self.tableWidget.setItem(row_idx, col_idx, item)
-
+            self.tableWidget.setRowHeight(row_idx, row_height)
+            col_idx = 0
+            for key, data in row.items():
+                if key.lower() != 'password':  # Skip password column
+                    item = QtWidgets.QTableWidgetItem(str(data))
+                    item.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.tableWidget.setItem(row_idx, col_idx, item)
+                    col_idx += 1
         self.tableWidget.resizeRowsToContents()
 
-    #remove admin button
     def handle_remove_admin(self):
-        """function to call remove_admin with input from lineEdit."""
+        """Function to call remove_admin with input from lineEdit."""
         username = self.lineEdit.text()
         remove_admin(username, self.load_data)  
 
-    #adding admin button
     def adding_admin(self):
         """Function to open the Adding Admin window."""
         self.admin_window = AddAdminPanel() 
         self.admin_window.show()  
     
-    #back to admin panel button
     def go_back(self):
         """Function to return to the Admin Panel."""
         from src.frontend.admin_panel import admin_panel

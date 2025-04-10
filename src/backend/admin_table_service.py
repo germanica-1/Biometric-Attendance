@@ -1,11 +1,10 @@
 import os
 import pymysql
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
 
-#Refreshing and loading table database
 def load_data(tableWidget):
-    """ Fetch and display admin data in the table widget. """
+    """Fetch and display admin data while excluding the password column."""
     try:
         mydb = pymysql.connect(
             host=os.getenv("DB_HOST"),
@@ -15,41 +14,42 @@ def load_data(tableWidget):
             cursorclass=pymysql.cursors.DictCursor
         )
         mycursor = mydb.cursor()
-        print("Connected to database")
     except pymysql.MySQLError as err:
-        print(f"Database connection error: {err}")
-        QMessageBox.critical(None, "Connection Error", "Failed to connect to the database.")
-        return None  # Return None if connection fails
+        QMessageBox.critical(None, "Connection Error", "Failed to connect to database.")
+        return None
 
     try:
+        # Get all column names except password
         mycursor.execute("SHOW COLUMNS FROM login")
-        columns = [column['Field'] for column in mycursor.fetchall()]
-
+        columns = [column['Field'] for column in mycursor.fetchall() 
+                  if column['Field'].lower() != 'password']  # Exclude password column
+        
+        # Set table columns
         tableWidget.setColumnCount(len(columns))
         tableWidget.setHorizontalHeaderLabels(columns)
 
-        # Fetch data
-        query = "SELECT user, Username, Password, pin_admin FROM login"
+        # Fetch all data except password column
+        query = "SELECT user, Username, pin_admin FROM login"  # Explicitly list columns
         mycursor.execute(query)
-        results = mycursor.fetchall()  # Fetch all rows
+        results = mycursor.fetchall()
 
         tableWidget.setRowCount(len(results))
-
+        
         for row_idx, row in enumerate(results):
             for col_idx, col_name in enumerate(columns):
-                tableWidget.setItem(row_idx, col_idx, QtWidgets.QTableWidgetItem(str(row[col_name])))
+                value = str(row[col_name]) if row[col_name] is not None else ""
+                item = QtWidgets.QTableWidgetItem(value)
+                tableWidget.setItem(row_idx, col_idx, item)
 
-        return results  # Return the fetched data
+        return results
 
     except pymysql.MySQLError as err:
-        print(f"Error fetching data: {err}")
-        QMessageBox.critical(None, "Database Error", "Failed to fetch data from the database.")
-        return None  # Return None if query fails
-
+        QMessageBox.critical(None, "Database Error", "Failed to fetch data.")
+        return None
     finally:
         mycursor.close()
         mydb.close()
-
+        
 #Removing admin users
 def remove_admin(username, load_data_callback=None): 
     """Function to remove an admin by username."""

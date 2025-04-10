@@ -2,10 +2,11 @@ import os
 import pymysql
 from PyQt5.QtWidgets import QMessageBox
 
+
 def reset_password(username, new_password, admin_pin):
     """
     Verify if the username and admin pin match in the database.
-    If valid, update the user's password.
+    If valid, hash and update the user's password.
     """
     try:
         # Connect to the database
@@ -28,10 +29,15 @@ def reset_password(username, new_password, admin_pin):
         user = mycursor.fetchone()
         
         if user:
-            # Update the password for the matched username
+            # Hash the new password before storing
+            from passlib.hash import pbkdf2_sha256  # Import Passlib's PBKDF2 hasher
+            hashed_password = pbkdf2_sha256.hash(new_password)
+            
+            # Update the password with the hashed version
             update_query = "UPDATE login SET Password = %s WHERE Username = %s"
-            mycursor.execute(update_query, (new_password, username))
+            mycursor.execute(update_query, (hashed_password, username))
             mydb.commit()
+            
             QMessageBox.information(None, "Success", "Password has been successfully reset.")
             return True
         else:
@@ -39,10 +45,11 @@ def reset_password(username, new_password, admin_pin):
             return False
     
     except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Database Error", "An error occurred while updating the password.")
+        QMessageBox.critical(None, "Database Error", f"An error occurred: {str(err)}")
         return False
-    
+    except Exception as e:
+        QMessageBox.critical(None, "Error", f"Password hashing failed: {str(e)}")
+        return False
     finally:
         mycursor.close()
         mydb.close()
-
