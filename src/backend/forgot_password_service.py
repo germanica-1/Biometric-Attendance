@@ -8,6 +8,7 @@ def reset_password(username, new_password, admin_pin):
     Verify if the username and admin pin match in the database.
     If valid, hash and update the user's password.
     """
+    print("")
     try:
         # Connect to the database
         mydb = pymysql.connect(
