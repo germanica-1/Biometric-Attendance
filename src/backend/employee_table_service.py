@@ -2,6 +2,7 @@ import os
 import pymysql
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+import requests
 
 #Refreshing and loading table database
 def load_data(EmployeeTable):
@@ -51,10 +52,26 @@ def load_data(EmployeeTable):
         mydb.close()
 
 
-#Removing admin users
-def remove_employee(Name, load_data_callback=None): 
-    """Function to remove an employee by Name."""
-    Name = Name.strip()  # Ensure no accidental spaces
+def delete_fingerprint(fingerprint_id):
+    """Send command to ESP8266 to delete fingerprint template"""
+    try:
+        ap_ip = os.getenv("AP_WIFI") or "192.168.4.1"
+        response = requests.post(
+            f"http://{ap_ip}/delete_fingerprint",
+            json={"id": fingerprint_id},
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            return True, "Fingerprint deleted successfully"
+        return False, f"Device error: {response.text}"
+            
+    except Exception as e:
+        return False, f"Connection failed: {str(e)}"
+
+def remove_employee(Name, load_data_callback=None):
+    """Function to remove an employee by Name and their fingerprint."""
+    Name = Name.strip()
 
     if not Name:
         QMessageBox.warning(None, "Input Error", "Please enter a Name to remove.")
@@ -74,7 +91,7 @@ def remove_employee(Name, load_data_callback=None):
         return
 
     try:
-        # Check if Name exists
+        # Check if Name exists and get ID
         mycursor.execute("SELECT * FROM employee WHERE Name = %s", (Name,))
         user = mycursor.fetchone()
         
@@ -85,23 +102,33 @@ def remove_employee(Name, load_data_callback=None):
         # Confirm deletion
         confirm = QMessageBox.question(
             None, "Confirm Deletion", 
-            f"Are you sure you want to remove '{Name}'?",
+            f"Are you sure you want to remove '{Name}' and their fingerprint?",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         
         if confirm == QMessageBox.Yes:
+            # Delete fingerprint first
+            fingerprint_id = user['ID']
+            success, message = delete_fingerprint(fingerprint_id)
+            
+            if not success:
+                QMessageBox.warning(None, "Warning", 
+                                  f"Employee found but fingerprint deletion failed: {message}\n"
+                                  "Do you want to remove from database anyway?",
+                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                return
+
             # Delete the user
             mycursor.execute("DELETE FROM employee WHERE Name = %s", (Name,))
             mydb.commit()
-            QMessageBox.information(None, "Success", f"Employee '{Name}' removed successfully.")
+            QMessageBox.information(None, "Success", 
+                                   f"Employee '{Name}' and fingerprint removed successfully.")
             
-            # Refresh the data if a callback is provided
             if load_data_callback:
-                load_data_callback()  # Call the function to refresh the UI
+                load_data_callback()
         
     except pymysql.MySQLError as err:
         QMessageBox.critical(None, "Database Error", f"An error occurred: {err}")
-    
     finally:
         mycursor.close()
         mydb.close()
