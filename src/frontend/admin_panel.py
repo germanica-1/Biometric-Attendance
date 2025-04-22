@@ -121,35 +121,6 @@ class admin_panel(object):
         self.add_Admin.setObjectName("add_Admin")
         self.verticalLayout_4.addWidget(self.add_Admin)
 
-
-        
-        self.Change_wifi = QtWidgets.QPushButton(self.frame_2)
-        self.Change_wifi.setMaximumSize(QtCore.QSize(700, 60))
-        font = QtGui.QFont()
-        font.setFamily("Times New Roman")
-        font.setPointSize(20)
-        font.setBold(True)
-        font.setWeight(75)
-        self.Change_wifi.clicked.connect(self.change_wifi_ui)
-        self.Change_wifi.setFont(font)
-        self.Change_wifi.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(75, 152, 61); \n"
-"    color: rgb(255, 255, 255);\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(75, 160, 61); \n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: rgb(75, 180, 61);\n"
-"}")
-        self.Change_wifi.setObjectName("Change_wifi")
-        self.verticalLayout_4.addWidget(self.Change_wifi)
-        self.verticalLayout_2.addWidget(self.frame_2, 0, QtCore.Qt.AlignHCenter)
-
-
-
         self.Logout_B = QtWidgets.QPushButton(self.frame_2)
         self.Logout_B.setMaximumSize(QtCore.QSize(700, 60))
         self.add_Admin.clicked.connect(self.open_add_admin)
@@ -195,7 +166,6 @@ class admin_panel(object):
         self.ViewRecords.setText(_translate("MainWindow", "View Records"))
         self.Add_employee.setText(_translate("MainWindow", "Add Employee"))
         self.add_Admin.setText(_translate("MainWindow", "Add New Admin"))
-        self.Change_wifi.setText(_translate("MainWindow", "Change Wifi"))
         self.Logout_B.setText(_translate("MainWindow", "Logout"))
 
     def open_add_admin(self):
@@ -221,13 +191,6 @@ class admin_panel(object):
         self.logout_Window = QtWidgets.QMainWindow()
         self.ui = LoginPanel()
         self.ui.show()  # Directly show the login window
-
-    def change_wifi_ui(self):
-        from src.frontend.change_wifi_gui import ChangeWiFiPanel
-        """Function to open change wifi gui"""
-        self.change_wifi_window = QtWidgets.QMainWindow()
-        self.changewifi = ChangeWiFiPanel()
-        self.changewifi.show()
 
 if __name__ == "__main__":
     import sys

@@ -7,7 +7,11 @@ def enroll_fingerprint_via_wifi(employee_id, employee_name, max_retries=3):
     """
     Send command to ESP8266 to enroll fingerprint for given employee ID and name
     """
-    base_url = "http://192.168.4.1"  # Default AP IP of ESP8266
+    base_ip = os.getenv("AP_WIFI")
+    if not base_ip:
+        return False, "Missing AP_WIFI environment variable"
+    
+    base_url = f"http://{base_ip.strip()}"
     endpoint = "/enroll"
     
     for attempt in range(max_retries):
@@ -44,19 +48,16 @@ def add_employee(ID, Name):
         )
         cursor = mydb.cursor()
 
-        # Check if the ID already exists
         cursor.execute("SELECT * FROM employee WHERE ID = %s", (ID,))
         if cursor.fetchone():
             return False, "ID already exists"
 
-        # Insert employee record
         cursor.execute(
             "INSERT INTO employee (ID, Name) VALUES (%s, %s)",
             (ID, Name)
         )
         mydb.commit()
 
-        # Trigger fingerprint enrollment
         success, message = enroll_fingerprint_via_wifi(ID, Name)
         
         if success:

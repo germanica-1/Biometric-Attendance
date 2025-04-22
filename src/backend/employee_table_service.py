@@ -55,7 +55,7 @@ def load_data(EmployeeTable):
 def delete_fingerprint(fingerprint_id):
     """Send command to ESP8266 to delete fingerprint template"""
     try:
-        ap_ip = os.getenv("AP_WIFI") or "192.168.4.1"
+        ap_ip = os.getenv("AP_WIFI")
         response = requests.post(
             f"http://{ap_ip}/delete_fingerprint",
             json={"id": fingerprint_id},
