@@ -2,6 +2,8 @@ import pymysql
 import os
 import requests
 import time
+import sqlite3
+import os
 
 def enroll_fingerprint_via_wifi(employee_id, employee_name, max_retries=3):
     """
@@ -33,41 +35,45 @@ def enroll_fingerprint_via_wifi(employee_id, employee_name, max_retries=3):
             time.sleep(2)
 
 def add_employee(ID, Name):
-    if not ID.isdigit():
+    """Adds a new employee to the SQLite database and initiates fingerprint enrollment"""
+    # Input validation
+    if not str(ID).isdigit():
         return False, "ID must be an integer"
-    if not Name:
+    if not Name.strip():
         return False, "Name cannot be empty"
 
+    conn = None
     try:
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        cursor = mydb.cursor()
+        # Connect to SQLite database
+        DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM employee WHERE ID = %s", (ID,))
+        # Check if ID exists
+        cursor.execute("SELECT 1 FROM employee WHERE ID = ?", (ID,))
         if cursor.fetchone():
             return False, "ID already exists"
 
+        # Insert new employee
         cursor.execute(
-            "INSERT INTO employee (ID, Name) VALUES (%s, %s)",
-            (ID, Name)
+            "INSERT INTO employee (ID, Name) VALUES (?, ?)",
+            (ID, Name.strip())
         )
-        mydb.commit()
+        conn.commit()
 
-        success, message = enroll_fingerprint_via_wifi(ID, Name)
+        # Initiate fingerprint enrollment
+        success, message = enroll_fingerprint_via_wifi(ID, Name.strip())
         
         if success:
             return True, "Employee added and fingerprint enrollment started successfully!"
-        else:
-            return True, f"Employee added but fingerprint enrollment failed: {message}"
+        return True, f"Employee added but fingerprint enrollment failed: {message}"
     
+    except sqlite3.IntegrityError as e:
+        return False, f"Database integrity error: {str(e)}"
+    except sqlite3.Error as e:
+        return False, f"Database error: {str(e)}"
     except Exception as e:
-        return False, f"Database Error: {str(e)}"
-
+        return False, f"Unexpected error: {str(e)}"
     finally:
-        cursor.close()
-        mydb.close()
+        if conn:
+            conn.close()

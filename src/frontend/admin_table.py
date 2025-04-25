@@ -151,15 +151,21 @@ class add_admin(object):
 
     def load_data(self):
         """Fetch and display admin data without password column."""
-        admins = load_data(self.tableWidget) 
+        admins = load_data(self.tableWidget)
+        if admins is None:  # Handle case when load_data returns None
+            return
+            
         self.tableWidget.setRowCount(len(admins))
         row_height = 70
         for row_idx, row in enumerate(admins):
             self.tableWidget.setRowHeight(row_idx, row_height)
             col_idx = 0
-            for key, data in row.items():
-                if key.lower() != 'password':  # Skip password column
-                    item = QtWidgets.QTableWidgetItem(str(data))
+            # SQLite Row object can be accessed by index or column name
+            for i in range(len(row)):  # Loop through columns by index
+                col_name = self.tableWidget.horizontalHeaderItem(i).text().lower()
+                if col_name != 'password':  # Skip password column
+                    data = row[i]  # Access by index
+                    item = QtWidgets.QTableWidgetItem(str(data) if data is not None else "")
                     item.setTextAlignment(QtCore.Qt.AlignCenter)
                     self.tableWidget.setItem(row_idx, col_idx, item)
                     col_idx += 1

@@ -3,79 +3,61 @@ import pymysql
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
 
+import sqlite3
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
+
 def load_data(tableWidget):
     """Fetch and display admin data while excluding the password column."""
+    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    
+    conn = None
     try:
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        mycursor = mydb.cursor()
-    except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Connection Error", "Failed to connect to database.")
-        return None
+        # Connect to SQLite database
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # Enable dictionary-style access
+        cursor = conn.cursor()
 
-    try:
-        # Get all column names except password
-        mycursor.execute("SHOW COLUMNS FROM login")
-        columns = [column['Field'] for column in mycursor.fetchall() 
-                  if column['Field'].lower() != 'password']  # Exclude password column
+        # Get column names (excluding password)
+        cursor.execute("PRAGMA table_info(login)")
+        columns = [column[1] for column in cursor.fetchall() 
+                  if column[1].lower() != 'password']
         
         # Set table columns
         tableWidget.setColumnCount(len(columns))
         tableWidget.setHorizontalHeaderLabels(columns)
 
-        # Fetch all data except password column
-        query = "SELECT user, Username, pin_admin FROM login"  # Explicitly list columns
-        mycursor.execute(query)
-        results = mycursor.fetchall()
+        # Fetch data
+        query = "SELECT user, Username, pin_admin FROM login"  # Explicit columns
+        cursor.execute(query)
+        results = cursor.fetchall()
 
-        tableWidget.setRowCount(len(results))
-        
-        for row_idx, row in enumerate(results):
-            for col_idx, col_name in enumerate(columns):
-                value = str(row[col_name]) if row[col_name] is not None else ""
-                item = QtWidgets.QTableWidgetItem(value)
-                tableWidget.setItem(row_idx, col_idx, item)
+        # Return as list of rows that can be indexed
+        return list(results)
 
-        return results
-
-    except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Database Error", "Failed to fetch data.")
+    except sqlite3.Error as err:
+        QMessageBox.critical(None, "Database Error", f"Failed to fetch data: {str(err)}")
         return None
     finally:
-        mycursor.close()
-        mydb.close()
-        
-#Removing admin users
-def remove_admin(username, load_data_callback=None): 
-    """Function to remove an admin by username."""
-    username = username.strip()  # Ensure no accidental spaces
+        if conn:
+            conn.close()
+
+def remove_admin(username, load_data_callback=None):
+    """Function to remove an admin by username using SQLite."""
+    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    username = username.strip()
     
     if not username:
         QMessageBox.warning(None, "Input Error", "Please enter a username to remove.")
         return
 
+    conn = None
     try:
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        mycursor = mydb.cursor()
-    except pymysql.MySQLError:
-        QMessageBox.critical(None, "Connection Error", "Failed to connect to the database.")
-        return
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
 
-    try:
         # Check if username exists
-        mycursor.execute("SELECT * FROM login WHERE Username = %s", (username,))
-        user = mycursor.fetchone()
+        cursor.execute("SELECT * FROM login WHERE Username = ?", (username,))
+        user = cursor.fetchone()
         
         if not user:
             QMessageBox.warning(None, "Not Found", f"No admin found with username: {username}")
@@ -90,17 +72,18 @@ def remove_admin(username, load_data_callback=None):
         
         if confirm == QMessageBox.Yes:
             # Delete the user
-            mycursor.execute("DELETE FROM login WHERE Username = %s", (username,))
-            mydb.commit()
+            cursor.execute("DELETE FROM login WHERE Username = ?", (username,))
+            conn.commit()
             QMessageBox.information(None, "Success", f"Admin '{username}' removed successfully.")
             
             # Refresh the data if a callback is provided
             if load_data_callback:
-                load_data_callback()  # Call the function to refresh the UI
-        
-    except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Database Error", f"An error occurred: {err}")
-    
+                load_data_callback()
+
+    except sqlite3.Error as err:
+        QMessageBox.critical(None, "Database Error", f"An error occurred: {str(err)}")
+        if conn:
+            conn.rollback()
     finally:
-        mycursor.close()
-        mydb.close()
+        if conn:
+            conn.close()

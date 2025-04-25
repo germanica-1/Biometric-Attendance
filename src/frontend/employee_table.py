@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from src.frontend.adding_employee_gui import EmployeeWindow
 from src.backend.employee_table_service import load_data
 from src.backend.employee_table_service import remove_employee
@@ -163,21 +164,37 @@ class addEmployee(object):
         Name = self.Search.text()
         remove_employee(Name, self.load_data)  
        
-    #refresh button
     def load_data(self):
-        """ Fetch and display admin data. """
-        Employee = load_data(self.EmployeeTable) 
-        self.EmployeeTable.setRowCount(len(Employee))
-        row_height = 70
-        for row_idx, row in enumerate(Employee):
-            self.EmployeeTable.setRowHeight(row_idx, row_height)  
-            for col_idx, data in enumerate(row.values()):
-                item = QtWidgets.QTableWidgetItem(str(data))
-                item.setTextAlignment(QtCore.Qt.AlignCenter)
-                self.EmployeeTable.setItem(row_idx, col_idx, item)
-
-        self.EmployeeTable.resizeRowsToContents()
-
+        """Fetch and display employee data from SQLite database."""
+        try:
+            # Load data from database
+            employees = load_data(self.EmployeeTable)
+            
+            if employees is None:
+                QMessageBox.warning(self, "Warning", "No data found or error occurred")
+                return
+                
+            # Clear existing data
+            self.EmployeeTable.setRowCount(0)
+            
+            # Set new data
+            self.EmployeeTable.setRowCount(len(employees))
+            row_height = 70
+            
+            for row_idx, row in enumerate(employees):
+                self.EmployeeTable.setRowHeight(row_idx, row_height)
+                
+                # SQLite Row objects don't have .values(), so we access by index
+                for col_idx in range(len(row)):
+                    data = row[col_idx]  # Access data by column index
+                    item = QtWidgets.QTableWidgetItem(str(data) if data is not None else "")
+                    item.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.EmployeeTable.setItem(row_idx, col_idx, item)
+                    
+            self.EmployeeTable.resizeRowsToContents()
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load data: {str(e)}")
 
 if __name__ == "__main__":
     import sys

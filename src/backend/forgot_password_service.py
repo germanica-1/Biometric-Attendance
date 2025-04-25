@@ -1,55 +1,49 @@
 import os
-import pymysql
+import sqlite3
 from PyQt5.QtWidgets import QMessageBox
+from passlib.hash import pbkdf2_sha256
 
+# SQLite database path (same as your other SQLite connection)
+DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
 
 def reset_password(username, new_password, admin_pin):
     """
     Verify if the username and admin pin match in the database.
-    If valid, hash and update the user's password.
+    If valid, hash and update the user's password using SQLite.
     """
+    conn = None
     try:
-        # Connect to the database
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        mycursor = mydb.cursor()
-    except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Connection Error", "Failed to connect to the database.")
-        return False
-    
-    try:
+        # Connect to SQLite database
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # Enable dictionary-style access
+        cursor = conn.cursor()
+        
         # Check if the username and admin pin match
-        query = "SELECT * FROM login WHERE Username = %s AND pin_admin = %s"
-        mycursor.execute(query, (username, admin_pin))
-        user = mycursor.fetchone()
+        query = "SELECT * FROM login WHERE Username = ? AND pin_admin = ?"
+        cursor.execute(query, (username, admin_pin))
+        user = cursor.fetchone()
         
         if user:
-            # Hash the new password before storing
-            from passlib.hash import pbkdf2_sha256  # Import Passlib's PBKDF2 hasher
+            # Hash the new password
             hashed_password = pbkdf2_sha256.hash(new_password)
             
-            # Update the password with the hashed version
-            update_query = "UPDATE login SET Password = %s WHERE Username = %s"
-            mycursor.execute(update_query, (hashed_password, username))
-            mydb.commit()
+            # Update the password
+            update_query = "UPDATE login SET Password = ? WHERE Username = ?"
+            cursor.execute(update_query, (hashed_password, username))
+            conn.commit()
             
             QMessageBox.information(None, "Success", "Password has been successfully reset.")
             return True
         else:
             QMessageBox.warning(None, "Invalid Credentials", "Username or Admin PIN is incorrect.")
             return False
-    
-    except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Database Error", f"An error occurred: {str(err)}")
+            
+    except sqlite3.Error as err:
+        QMessageBox.critical(None, "Database Error", f"SQLite error: {str(err)}")
         return False
     except Exception as e:
-        QMessageBox.critical(None, "Error", f"Password hashing failed: {str(e)}")
+        QMessageBox.critical(None, "Error", f"An unexpected error occurred: {str(e)}")
         return False
     finally:
-        mycursor.close()
-        mydb.close()
+        if conn:
+            conn.close()

@@ -1,44 +1,37 @@
-import mysql.connector
-from dotenv import load_dotenv
+import sqlite3
 import os
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
 from src.frontend.admin_panel import admin_panel
-import pymysql
+from passlib.hash import pbkdf2_sha256
 import sys
 
-
-# Load database environment variables
-dotenv_path = os.path.join(
-    "C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/.env"
-)
-load_dotenv(dotenv_path=dotenv_path)
-
+# Database path (adjust to your actual path)
+DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
 
 # Global trial counter
 trial_no = 0
+
 class AdminPanelWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        super().__init__(parent)  # Pass parent reference to prevent garbage collection
-        self.ui = admin_panel()  # Create an instance of admin_panel
+        super().__init__(parent)
+        self.ui = admin_panel()
         self.setWindowTitle("Admin Panel")
-        self.ui.setupUi(self)  # Pass self (QMainWindow) to setup the UI correctly
+        self.ui.setupUi(self)
         self.resize(900, 700)
-        
-# Function to handle login attempts
+
 def trial(window):
     """Handles failed login attempts and closes window after 3 attempts."""
     global trial_no
     trial_no += 1
     QMessageBox.warning(window, "Warning!", f"Attempted Login: {trial_no}/3")
 
-    if trial_no ==3:
-        print("Closing the login window after 3 failed attempts.")  # Debug message
-        print("error1")
+    if trial_no == 3:
+        print("Closing the login window after 3 failed attempts.")
         window.close()
-        
+
 def loginuser(username, password, window):
-    """Handles the login process with improved password verification."""
+    """Handles the login process with SQLite database."""
     global trial_no
 
     # Input validation
@@ -46,37 +39,32 @@ def loginuser(username, password, window):
         QMessageBox.critical(window, "Entry Error", "Please enter both username and password.")
         return
 
+    conn = None
     try:
-        # Database connection
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor,
-        )
-        mycursor = mydb.cursor()
+        # Connect to SQLite database
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # Enable dictionary-style access
+        cursor = conn.cursor()
 
         # Fetch user by username
-        mycursor.execute("SELECT * FROM login WHERE Username = %s", (username,))
-        myresult = mycursor.fetchone()
+        cursor.execute("SELECT * FROM login WHERE Username = ?", (username,))
+        user = cursor.fetchone()
 
-        if not myresult:
+        if not user:
             QMessageBox.warning(window, "Invalid Credentials", "Username not found.")
             trial(window)
             return
 
-        stored_hash = myresult['Password']
+        stored_hash = user['Password']
         
-        # Flexible password verification
-        from passlib.hash import pbkdf2_sha256
+        # Password verification
         try:
-            if pbkdf2_sha256.identify(stored_hash):  # Check if it's a PBKDF2 hash
+            if pbkdf2_sha256.identify(stored_hash):
                 valid = pbkdf2_sha256.verify(password, stored_hash)
             else:
-                # Fallback for legacy hashes (like bcrypt or plaintext - INSECURE, migrate ASAP)
+                # Fallback for plaintext comparison (INSECURE - for migration only)
                 valid = False
-                if stored_hash == password:  # Plain text comparison (INSECURE)
+                if stored_hash == password:
                     QMessageBox.warning(window, "Security Warning", 
                                       "Your password is stored insecurely. Please contact admin.")
                     valid = True
@@ -103,7 +91,19 @@ def loginuser(username, password, window):
     except Exception as e:
         QMessageBox.critical(window, "Error", f"An error occurred: {str(e)}")
     finally:
-        if mydb:
-            mycursor.close()
-            mydb.close()
+        if conn:
+            conn.close()
 
+# Sample usage if running this module directly
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    
+    # Test database connection
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        print("Successfully connected to SQLite database")
+        conn.close()
+    except Exception as e:
+        print(f"Database connection failed: {str(e)}")
+    
+    sys.exit(app.exec_())

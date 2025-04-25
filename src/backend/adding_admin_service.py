@@ -1,55 +1,63 @@
-import pymysql
+import sqlite3
 import os
+from passlib.hash import pbkdf2_sha256
 
+# Database path - adjust this to your actual path
+DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
 
 def add_admin(user_id, username, password, pin):
-    if not user_id.isdigit():
-        return False, "UserID must be an integer"
+    """Adds a new admin account to the SQLite database with proper validation"""
+    # Input validation
+    try:
+        user_id = int(user_id)
+        pin = int(pin)
+    except ValueError:
+        return False, "ID and Pin must be numbers"
+    
     if not username or not password:
         return False, "Username and Password cannot be empty"
-    if not pin.isdigit() or len(pin) != 4:
+    if len(str(pin)) != 4:
         return False, "Admin Pin must be a 4-digit number"
     
-    # Initialize variables to None
-    mydb = None
-    cursor = None
-    
+    conn = None
     try:
-        # Hash the password with passlib
-        from passlib.hash import pbkdf2_sha256  # Using PBKDF2 with SHA256
-        hashed_password = pbkdf2_sha256.hash(password)
+        # Hash the password with 29,000 iterations (security best practice)
+        hashed_password = pbkdf2_sha256.using(rounds=29000).hash(password)
         
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        cursor = mydb.cursor()
+        # Connect to database with error handling
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
+        cursor = conn.cursor()
 
-        # Check if the user ID already exists
-        cursor.execute("SELECT * FROM login WHERE user = %s", (user_id,))
-        if cursor.fetchone():
-            return False, "UserID already exists"
-
-        # Insert with hashed password
+        # Check if username or ID already exists
         cursor.execute(
-            "INSERT INTO login (user, Username, Password, pin_admin) VALUES (%s, %s, %s, %s)",
+            "SELECT 1 FROM login WHERE user = ? OR Username = ?", 
+            (user_id, username)
+        )
+        if cursor.fetchone():
+            return False, "User ID or Username already exists"
+
+        # Insert with transaction
+        cursor.execute(
+            """INSERT INTO login (user, Username, Password, pin_admin) 
+            VALUES (?, ?, ?, ?)""",
             (user_id, username, hashed_password, pin)
         )
-        mydb.commit()
-        return True, "Admin added successfully!"
+        conn.commit()
+        return True, f"Admin '{username}' added successfully"
     
+    except sqlite3.IntegrityError as e:
+        return False, f"Database integrity error: {str(e)}"
+    except sqlite3.Error as e:
+        return False, f"Database error: {str(e)}"
     except Exception as e:
-        # Rollback in case of error
-        if mydb:
-            mydb.rollback()
-        return False, f"Database Error: {str(e)}"
+        return False, f"Unexpected error: {str(e)}"
     finally:
-        # Close cursor if it exists
-        if cursor:
-            cursor.close()
-        # Close connection if it exists
-        if mydb:
-            mydb.close()
+        if conn:
+            conn.close()
+
+# Example usage:
+if __name__ == "__main__":
+    # Test adding an admin (user_id, username, password, pin)
+    result, message = add_admin(1, "admin", "securepassword123", 1234)
+    print(f"Success: {result}, Message: {message}")

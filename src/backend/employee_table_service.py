@@ -3,53 +3,50 @@ import pymysql
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import requests
+import sqlite3
 
 #Refreshing and loading table database
 def load_data(EmployeeTable):
-    """ Fetch and display admin data in the table widget. """
+    """Fetch employee data from SQLite database."""
+    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    
+    conn = None
     try:
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        mycursor = mydb.cursor()
-        print("Connected to database")
-    except pymysql.MySQLError as err:
-        print(f"Database connection error: {err}")
-        QMessageBox.critical(None, "Connection Error", "Failed to connect to the database.")
-        return None  # Return None if connection fails
-
-    try:
-        mycursor.execute("SHOW COLUMNS FROM employee")
-        columns = [column['Field'] for column in mycursor.fetchall()]
-
-        EmployeeTable.setColumnCount(len(columns))
-        EmployeeTable.setHorizontalHeaderLabels(columns)
-
+        # Connect to SQLite database
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Set table columns
+        EmployeeTable.setColumnCount(2)
+        EmployeeTable.setHorizontalHeaderLabels(["ID", "Name"])
+        
         # Fetch data
-        query = "SELECT ID, Name FROM employee"
-        mycursor.execute(query)
-        results = mycursor.fetchall()  # Fetch all rows
-
-        EmployeeTable.setRowCount(len(results))
-
-        for row_idx, row in enumerate(results):
-            for col_idx, col_name in enumerate(columns):
-                EmployeeTable.setItem(row_idx, col_idx, QtWidgets.QTableWidgetItem(str(row[col_name])))
-
-        return results  # Return the fetched data
-
-    except pymysql.MySQLError as err:
-        print(f"Error fetching data: {err}")
-        QMessageBox.critical(None, "Database Error", "Failed to fetch data from the database.")
-        return None  # Return None if query fails
-
+        cursor.execute("SELECT ID, Name FROM employee ORDER BY ID")
+        results = cursor.fetchall()
+        
+        return results
+        
+    except sqlite3.Error as err:
+        print(f"Database error: {err}")
+        QMessageBox.critical(
+            None, 
+            "Database Error", 
+            f"Failed to fetch data: {str(err)}"
+        )
+        return None
+        
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        QMessageBox.critical(
+            None, 
+            "Error", 
+            f"An unexpected error occurred: {str(e)}"
+        )
+        return None
+        
     finally:
-        mycursor.close()
-        mydb.close()
+        if conn:
+            conn.close()
 
 
 def delete_fingerprint(fingerprint_id):
@@ -70,30 +67,23 @@ def delete_fingerprint(fingerprint_id):
         return False, f"Connection failed: {str(e)}"
 
 def remove_employee(Name, load_data_callback=None):
-    """Function to remove an employee by Name and their fingerprint."""
+    """Function to remove an employee by Name and their fingerprint using SQLite."""
+    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
     Name = Name.strip()
 
     if not Name:
         QMessageBox.warning(None, "Input Error", "Please enter a Name to remove.")
         return
 
+    conn = None
     try:
-        mydb = pymysql.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        mycursor = mydb.cursor()
-    except pymysql.MySQLError:
-        QMessageBox.critical(None, "Connection Error", "Failed to connect to the database.")
-        return
+        # Connect to SQLite database
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
 
-    try:
         # Check if Name exists and get ID
-        mycursor.execute("SELECT * FROM employee WHERE Name = %s", (Name,))
-        user = mycursor.fetchone()
+        cursor.execute("SELECT * FROM employee WHERE Name = ?", (Name,))
+        user = cursor.fetchone()
         
         if not user:
             QMessageBox.warning(None, "Not Found", f"No employee found with Name: {Name}")
@@ -108,27 +98,36 @@ def remove_employee(Name, load_data_callback=None):
         
         if confirm == QMessageBox.Yes:
             # Delete fingerprint first
-            fingerprint_id = user['ID']
+            fingerprint_id = user[0]  # Access ID by index (first column)
             success, message = delete_fingerprint(fingerprint_id)
             
             if not success:
-                QMessageBox.warning(None, "Warning", 
-                                  f"Employee found but fingerprint deletion failed: {message}\n"
-                                  "Do you want to remove from database anyway?",
-                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                return
+                response = QMessageBox.warning(
+                    None, "Warning", 
+                    f"Employee found but fingerprint deletion failed: {message}\n"
+                    "Do you want to remove from database anyway?",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+                )
+                if response == QMessageBox.No:
+                    return
 
             # Delete the user
-            mycursor.execute("DELETE FROM employee WHERE Name = %s", (Name,))
-            mydb.commit()
-            QMessageBox.information(None, "Success", 
-                                   f"Employee '{Name}' and fingerprint removed successfully.")
+            cursor.execute("DELETE FROM employee WHERE Name = ?", (Name,))
+            conn.commit()
+            QMessageBox.information(
+                None, "Success", 
+                f"Employee '{Name}' and fingerprint removed successfully."
+            )
             
             if load_data_callback:
                 load_data_callback()
         
-    except pymysql.MySQLError as err:
-        QMessageBox.critical(None, "Database Error", f"An error occurred: {err}")
+    except sqlite3.Error as err:
+        QMessageBox.critical(None, "Database Error", f"SQLite error: {str(err)}")
+        if conn:
+            conn.rollback()
+    except Exception as e:
+        QMessageBox.critical(None, "Error", f"Unexpected error: {str(e)}")
     finally:
-        mycursor.close()
-        mydb.close()
+        if conn:
+            conn.close()
