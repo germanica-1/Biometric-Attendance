@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.frontend.admin_table import add_admin
 from src.frontend.employee_table import addEmployee
+from src.frontend.attendance_record import records
 
 class admin_panel(object):
     def setupUi(self, adminWindow):
@@ -63,6 +64,7 @@ class admin_panel(object):
 "}")
         
         self.ViewRecords.setObjectName("ViewRecords")
+        self.ViewRecords.clicked.connect(self.open_attendance_record)
         self.verticalLayout_4.addWidget(self.ViewRecords)
         self.Add_employee = QtWidgets.QPushButton(self.frame_2)
         self.Add_employee.setMaximumSize(QtCore.QSize(700, 60))
@@ -183,6 +185,14 @@ class admin_panel(object):
         self.ui = addEmployee() #Instantiate the add_employee UI
         self.ui.setupUi(self.add_employee_window)  # Set up the UI
         self.add_employee_window.show() #show window
+
+    def open_attendance_record(self):
+        """Function to open the attendance record window"""
+        self.adminWindow.close()
+        self.add_records_window = QtWidgets.QMainWindow()  # Create a new window
+        self.ui = records() #Instantiate the add_employee UI
+        self.ui.setupUi(self.add_records_window)  # Set up the UI
+        self.add_records_window.show() #show window
 
     def logout_func(self):
         from src.frontend.login_gui import LoginPanel
