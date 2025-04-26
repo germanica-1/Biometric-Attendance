@@ -184,7 +184,7 @@ class addEmployee(object):
             for row_idx, row in enumerate(employees):
                 self.EmployeeTable.setRowHeight(row_idx, row_height)
                 
-                # SQLite Row objects don't have .values(), so we access by index
+
                 for col_idx in range(len(row)):
                     data = row[col_idx]  # Access data by column index
                     item = QtWidgets.QTableWidgetItem(str(data) if data is not None else "")

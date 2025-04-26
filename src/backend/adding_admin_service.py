@@ -3,7 +3,7 @@ import os
 from passlib.hash import pbkdf2_sha256
 
 # Database path - adjust this to your actual path
-DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+DB_PATH = os.path.join("config", "mydb.sqlite")
 
 def add_admin(user_id, username, password, pin):
     """Adds a new admin account to the SQLite database with proper validation"""
@@ -56,8 +56,6 @@ def add_admin(user_id, username, password, pin):
         if conn:
             conn.close()
 
-# Example usage:
 if __name__ == "__main__":
-    # Test adding an admin (user_id, username, password, pin)
     result, message = add_admin(1, "admin", "securepassword123", 1234)
     print(f"Success: {result}, Message: {message}")

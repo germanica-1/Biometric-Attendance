@@ -4,11 +4,13 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import requests
 import sqlite3
+import time
+from dotenv import load_dotenv
 
 #Refreshing and loading table database
 def load_data(EmployeeTable):
     """Fetch employee data from SQLite database."""
-    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    DB_PATH = os.path.join("config", "mydb.sqlite")
     
     conn = None
     try:
@@ -49,26 +51,50 @@ def load_data(EmployeeTable):
             conn.close()
 
 
-def delete_fingerprint(fingerprint_id):
-    """Send command to ESP8266 to delete fingerprint template"""
-    try:
-        ap_ip = os.getenv("AP_WIFI")
-        response = requests.post(
-            f"http://{ap_ip}/delete_fingerprint",
-            json={"id": fingerprint_id},
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            return True, "Fingerprint deleted successfully"
-        return False, f"Device error: {response.text}"
+def delete_fingerprint(fingerprint_id, max_retries=3):
+    """Send command to ESP8266 to delete fingerprint template with robust error handling"""
+    env_path = os.path.join("config", ".env")
+    load_dotenv(env_path)
+    ap_ip = os.getenv("AP_WIFI")
+    
+    if not ap_ip:
+        return False, "AP_WIFI environment variable not set"
+    
+    endpoint = "/delete_fingerprint"
+    url = f"http://{ap_ip}{endpoint}"
+    
+    for attempt in range(max_retries):
+        try:
             
-    except Exception as e:
-        return False, f"Connection failed: {str(e)}"
+            response = requests.post(
+                url,
+                json={"id": int(fingerprint_id)},
+                timeout=10  # More reasonable timeout for local network
+            )
+            
+            print(f"Delete response: {response.status_code} - {response.text}")
+            
+            if response.status_code == 200:
+                # Check for different possible success responses
+                if ("success" in response.text.lower() or 
+                    "deleted" in response.text.lower()):
+                    return True, "Fingerprint deleted successfully"
+                return False, f"Unexpected response: {response.text}"
+            
+            return False, f"Device error (HTTP {response.status_code}): {response.text}"
+            
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Connection error (attempt {attempt + 1}): {str(e)}"
+            print(error_msg)
+            if attempt == max_retries - 1:  # Last attempt
+                return False, error_msg
+            time.sleep(2)  # Wait before retrying
+    
+    return False, "Max retries exceeded"
 
 def remove_employee(Name, load_data_callback=None):
     """Function to remove an employee by Name and their fingerprint using SQLite."""
-    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    DB_PATH = os.path.join("config", "mydb.sqlite")
     Name = Name.strip()
 
     if not Name:

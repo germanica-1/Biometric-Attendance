@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMessageBox
 from passlib.hash import pbkdf2_sha256
 
 # SQLite database path (same as your other SQLite connection)
-DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+DB_PATH = os.path.join("config", "mydb.sqlite")
 
 def reset_password(username, new_password, admin_pin):
     """

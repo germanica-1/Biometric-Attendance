@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 
 def load_data(tableWidget):
     """Fetch and display admin data while excluding the password column."""
-    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    DB_PATH = os.path.join("config", "mydb.sqlite")
     
     conn = None
     try:
@@ -43,7 +43,7 @@ def load_data(tableWidget):
 
 def remove_admin(username, load_data_callback=None):
     """Function to remove an admin by username using SQLite."""
-    DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+    DB_PATH = os.path.join("config", "mydb.sqlite")
     username = username.strip()
     
     if not username:

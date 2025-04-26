@@ -4,12 +4,15 @@ import requests
 import time
 import sqlite3
 import os
+from dotenv import load_dotenv
 
 def enroll_fingerprint_via_wifi(employee_id, employee_name, max_retries=3):
     """
     Send command to ESP8266 to enroll fingerprint for given employee ID and name
     """
-    base_ip = os.getenv("AP_WIFI")
+    env_path = os.path.join("config", ".env")
+    load_dotenv(env_path)
+    base_ip = os.getenv("AP_WIFI")  # Added default IP
     if not base_ip:
         return False, "Missing AP_WIFI environment variable"
     
@@ -25,7 +28,11 @@ def enroll_fingerprint_via_wifi(employee_id, employee_name, max_retries=3):
             )
             
             if response.status_code == 200:
-                return True, "Fingerprint enrollment started successfully"
+
+                if ("success" in response.text.lower() or 
+                    "enrollment_started" in response.text.lower()):
+                    return True, "Fingerprint enrollment started successfully"
+                return False, f"Unexpected response: {response.text}"
             else:
                 return False, f"Device error: {response.text}"
                 
@@ -45,7 +52,7 @@ def add_employee(ID, Name):
     conn = None
     try:
         # Connect to SQLite database
-        DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+        DB_PATH = os.path.join("config", "mydb.sqlite")
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 

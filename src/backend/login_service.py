@@ -7,7 +7,7 @@ from passlib.hash import pbkdf2_sha256
 import sys
 
 # Database path (adjust to your actual path)
-DB_PATH = os.path.join("C:/Users/Krypton/Desktop/projects/Biometric Attendance/config/mydb.sqlite")
+DB_PATH = os.path.join("config", "mydb.sqlite")
 
 # Global trial counter
 trial_no = 0
