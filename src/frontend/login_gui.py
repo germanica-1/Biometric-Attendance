@@ -14,16 +14,15 @@ class LoginPanel(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        # Setup paths
         self.BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        if getattr(sys, "frozen", False):  # If running as an EXE
+        if getattr(sys, "frozen", False): 
             self.BASE_DIR = (
-                sys._MEIPASS # Temporary folder where PyInstaller unpacks files
+                sys._MEIPASS 
             )
  
     def initUI(self):
         self.setWindowTitle('Login Page')
-        self.setFixedSize(350, 270)  # Adjusted fixed window size
+        self.setFixedSize(350, 270)  
         
         # Title Label
         title = QLabel('ADMIN LOGIN', self)
@@ -89,7 +88,7 @@ class LoginPanel(QWidget):
 
     def open_forgot_password(self):
         """Function to open the forgot password window"""
-        self.ui = ResetPasswordPanel() #Instantiate the remove password UI
+        self.ui = ResetPasswordPanel() 
         self.ui.show() #show window
 
 

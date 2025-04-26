@@ -12,7 +12,7 @@ def enroll_fingerprint_via_wifi(employee_id, employee_name, max_retries=3):
     """
     env_path = os.path.join("config", ".env")
     load_dotenv(env_path)
-    base_ip = os.getenv("AP_WIFI")  # Added default IP
+    base_ip = os.getenv("AP_WIFI") 
     if not base_ip:
         return False, "Missing AP_WIFI environment variable"
     

@@ -3,7 +3,7 @@ import sqlite3
 from PyQt5.QtWidgets import QMessageBox
 from passlib.hash import pbkdf2_sha256
 
-# SQLite database path (same as your other SQLite connection)
+# SQLite database path 
 DB_PATH = os.path.join("config", "mydb.sqlite")
 
 def reset_password(username, new_password, admin_pin):
@@ -15,7 +15,7 @@ def reset_password(username, new_password, admin_pin):
     try:
         # Connect to SQLite database
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # Enable dictionary-style access
+        conn.row_factory = sqlite3.Row  
         cursor = conn.cursor()
         
         # Check if the username and admin pin match

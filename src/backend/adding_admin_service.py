@@ -2,7 +2,7 @@ import sqlite3
 import os
 from passlib.hash import pbkdf2_sha256
 
-# Database path - adjust this to your actual path
+# Database path 
 DB_PATH = os.path.join("config", "mydb.sqlite")
 
 def add_admin(user_id, username, password, pin):
@@ -21,12 +21,12 @@ def add_admin(user_id, username, password, pin):
     
     conn = None
     try:
-        # Hash the password with 29,000 iterations (security best practice)
+        # Hash the password
         hashed_password = pbkdf2_sha256.using(rounds=29000).hash(password)
         
         # Connect to database with error handling
         conn = sqlite3.connect(DB_PATH)
-        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
+        conn.execute("PRAGMA foreign_keys = ON")  
         cursor = conn.cursor()
 
         # Check if username or ID already exists

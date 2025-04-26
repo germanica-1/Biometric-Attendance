@@ -15,7 +15,7 @@ class AddAdminPanel(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Add New Admin')
-        self.setFixedSize(350, 370)  # Set a fixed window size
+        self.setFixedSize(350, 370)  
 
         # Title Label
         title = QLabel('NEW ADMIN', self)

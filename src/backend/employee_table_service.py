@@ -69,7 +69,7 @@ def delete_fingerprint(fingerprint_id, max_retries=3):
             response = requests.post(
                 url,
                 json={"id": int(fingerprint_id)},
-                timeout=10  # More reasonable timeout for local network
+                timeout=10  
             )
             
             print(f"Delete response: {response.status_code} - {response.text}")
@@ -124,7 +124,7 @@ def remove_employee(Name, load_data_callback=None):
         
         if confirm == QMessageBox.Yes:
             # Delete fingerprint first
-            fingerprint_id = user[0]  # Access ID by index (first column)
+            fingerprint_id = user[0]  
             success, message = delete_fingerprint(fingerprint_id)
             
             if not success:

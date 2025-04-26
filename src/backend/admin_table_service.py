@@ -14,7 +14,7 @@ def load_data(tableWidget):
     try:
         # Connect to SQLite database
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # Enable dictionary-style access
+        conn.row_factory = sqlite3.Row 
         cursor = conn.cursor()
 
         # Get column names (excluding password)
@@ -27,7 +27,7 @@ def load_data(tableWidget):
         tableWidget.setHorizontalHeaderLabels(columns)
 
         # Fetch data
-        query = "SELECT user, Username, pin_admin FROM login"  # Explicit columns
+        query = "SELECT user, Username, pin_admin FROM login"  
         cursor.execute(query)
         results = cursor.fetchall()
 

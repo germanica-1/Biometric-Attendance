@@ -6,7 +6,7 @@ from src.frontend.admin_panel import admin_panel
 from passlib.hash import pbkdf2_sha256
 import sys
 
-# Database path (adjust to your actual path)
+# Database path
 DB_PATH = os.path.join("config", "mydb.sqlite")
 
 # Global trial counter
@@ -43,7 +43,7 @@ def loginuser(username, password, window):
     try:
         # Connect to SQLite database
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # Enable dictionary-style access
+        conn.row_factory = sqlite3.Row  
         cursor = conn.cursor()
 
         # Fetch user by username
@@ -62,7 +62,7 @@ def loginuser(username, password, window):
             if pbkdf2_sha256.identify(stored_hash):
                 valid = pbkdf2_sha256.verify(password, stored_hash)
             else:
-                # Fallback for plaintext comparison (INSECURE - for migration only)
+                # Fallback for plaintext comparison 
                 valid = False
                 if stored_hash == password:
                     QMessageBox.warning(window, "Security Warning", 
@@ -94,16 +94,3 @@ def loginuser(username, password, window):
         if conn:
             conn.close()
 
-# Sample usage if running this module directly
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    
-    # Test database connection
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        print("Successfully connected to SQLite database")
-        conn.close()
-    except Exception as e:
-        print(f"Database connection failed: {str(e)}")
-    
-    sys.exit(app.exec_())
