@@ -15,7 +15,7 @@ class TimeInSystem:
     def date_records(self):
         """Open date of records"""
         from src.frontend.date_records import DateRecordsUI
-        self.date_records_ui = DateRecordsUI(self)  # Pass self as parent
+        self.date_records_ui = DateRecordsUI(self) 
         self.date_records_ui.show()
         
     def get_work_times(self):
@@ -209,7 +209,7 @@ class TimeInSystem:
             
             conn.commit()
             
-            # Update UI if available
+
             if hasattr(self.ui, 'EmployeeTable'):
                 self.update_attendance_table()
             

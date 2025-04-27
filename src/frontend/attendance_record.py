@@ -240,7 +240,7 @@ class records(object):
         # Get the currently displayed date from the table if available
         current_date = None
         if self.EmployeeTable.rowCount() > 0:
-            date_item = self.EmployeeTable.item(0, 5)  # Date is in column 5
+            date_item = self.EmployeeTable.item(0, 5)  # Date in column 5
             if date_item:
                 current_date = date_item.text()
         
