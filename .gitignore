@@ -153,8 +153,6 @@ venv.bak/
 .dmypy.json
 dmypy.json
 *.json
-*.sqlite
-*.sqlite*
 
 
 # Pyre type checker
