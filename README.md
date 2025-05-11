@@ -44,6 +44,6 @@ Admin Software Usage
 * Admins log in using secure, registered credentials to access the control panel.
 * Upon adding a new employee, the software prompts the hardware module to begin fingerprint enrollment.
 * Employee fingerprints are captured and stored securely by placing their finger twice on the sensor.
-* Admins may remove employee records from the system as needed, as well as manage other admin accounts under appropriate authorization.
+* Admins may remove employee records from the system as needed.
 
 
