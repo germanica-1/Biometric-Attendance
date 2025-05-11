@@ -17,13 +17,13 @@ class TimeEdit(QLineEdit):
         self.setFont(QFont('Times New Roman', 15))
         self.setFixedSize(220, 30)
         
-        # Set validator to only allow digits and colon in correct positions
+        
         regex = QRegExp("^(0[0-9]|1[0-2]):[0-5][0-9]$")
         validator = QRegExpValidator(regex, self)
         self.setValidator(validator)
         
     def keyPressEvent(self, event):
-        # Auto-insert colon after first two digits
+        #
         text = self.text()
         if len(text) == 2 and event.key() not in (Qt.Key_Backspace, Qt.Key_Delete):
             super().keyPressEvent(event)
@@ -154,9 +154,9 @@ class EmployeeTimeOutPanel(QMainWindow):
             
             conn.commit()
             
-            # Update parent UI if available
+        
             if self.parent_ui and hasattr(self.parent_ui, 'EmployeeTable'):
-                self.parent_ui.EmployeeTable.update()  # Or your specific refresh method
+                self.parent_ui.EmployeeTable.update() 
             
             self.status_label.setText(f"Time out recorded: {employee_name} at {formatted_time}")
             QMessageBox.information(self, "Success", "Time out recorded successfully")

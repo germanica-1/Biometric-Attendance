@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QFont, QRegExpValidator
 from PyQt5.QtCore import Qt, QRegExp
 from PyQt5.QtWidgets import QMessageBox
-from src.backend.time_in import TimeInSystem  # Import your TimeInSystem class
+from src.backend.time_in import TimeInSystem  
 
 class TimeEdit(QLineEdit):
     def __init__(self, parent=None):
@@ -16,13 +16,13 @@ class TimeEdit(QLineEdit):
         self.setFont(QFont('Times New Roman', 15))
         self.setFixedSize(220, 30)
         
-        # Set validator to only allow digits and colon in correct positions
+       
         regex = QRegExp("^(0[0-9]|1[0-2]):[0-5][0-9]$")
         validator = QRegExpValidator(regex, self)
         self.setValidator(validator)
         
     def keyPressEvent(self, event):
-        # Auto-insert colon after first two digits
+
         text = self.text()
         if len(text) == 2 and event.key() not in (Qt.Key_Backspace, Qt.Key_Delete):
             super().keyPressEvent(event)
@@ -34,8 +34,8 @@ class TimeEdit(QLineEdit):
 class EmployeeTimeInPanel(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent_ui = parent  # Reference to the main window
-        self.time_in_system = TimeInSystem(self.parent_ui)  # Initialize with parent UI
+        self.parent_ui = parent 
+        self.time_in_system = TimeInSystem(self.parent_ui)  
         self.setupUI()
     
     def setupUI(self):
@@ -107,7 +107,7 @@ class EmployeeTimeInPanel(QMainWindow):
         time_text = self.time_in_input.text()
         ampm = self.time_in_ampm.currentText()
         
-        # Validate inputs
+        
         if not employee_name:
             QMessageBox.warning(self, "Error", "Please enter employee name.")
             return
@@ -117,15 +117,15 @@ class EmployeeTimeInPanel(QMainWindow):
             return
             
         try:
-            # Validate time format
+        
             hours, minutes = map(int, time_text.split(':'))
             if hours < 1 or hours > 12 or minutes < 0 or minutes > 59:
                 raise ValueError
                 
-            # Format the time with AM/PM
+           
             formatted_time = f"{time_text} {ampm}"
             
-            # Call the time_in_employee method with both parameters
+           
             success = self.time_in_system.time_in_employee(
                 employee_name=employee_name,
                 manual_time=formatted_time

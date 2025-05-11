@@ -218,7 +218,6 @@ class TimeInSystem:
         
         # Wait briefly to ensure server starts
         time.sleep(1)
-        print("\nFlask server ready at http://192.168.4.2:5000")
 
     def stop_flask_server(self):
         """Properly shutdown the Flask server"""
