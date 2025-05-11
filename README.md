@@ -36,7 +36,7 @@ Admins can:
 * View attendance records, including time-ins, time-outs, late arrivals, and absences.
 * Register new employees and initiate fingerprint enrollment (requires the employee to scan their finger twice).
 * Remove employee data when individuals resign or are terminated.
-* Add new admin users, subject to authorization from company leadership.
+* Add new admin users.
 * Remove admin access for users no longer authorized.
 
 Admin Software Usage
