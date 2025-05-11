@@ -3,7 +3,7 @@ Fingerprint Attendance with Control System (F.A.C.S)
 
 Overview
 
-The Fingerprint Attendance with Control System (F.A.C.S) is a biometric-based attendance tracking system designed for companies to accurately manage employee attendance both offline and online. It consists of a hardware fingerprint module integrated with a software application used by authorized administrators.
+The Fingerprint Attendance with Control System (F.A.C.S) is a biometric-based attendance tracking system designed for our host company (Philgen Engineering Services) to accurately manage employee attendance both offline and online. It consists of a hardware fingerprint module integrated with a software application used by authorized administrators.
 
 Tech used
 * Python
