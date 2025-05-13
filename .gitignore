@@ -62,7 +62,7 @@ db.sqlite3
 db.sqlite3-journal
 *.sqlite*
 mydb.sqlite3
-.sqlite3
+.sqlite
 
 
 # Flask stuff:

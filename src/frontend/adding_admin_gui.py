@@ -22,7 +22,7 @@ class AddAdminPanel(QWidget):
         title.setFont(QFont('Arial', 20, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
 
-        # UserID
+        # User
         user_id_label = QLabel('UserID:')
         user_id_label.setFont(QFont('Times New Roman', 12))
         self.user_id_input = QLineEdit()
