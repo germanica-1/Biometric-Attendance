@@ -76,7 +76,7 @@ class AddAdminPanel(QWidget):
 
         self.setLayout(layout)
 
-        # Disable Maximize Button
+        
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)
 
     def handle_add_admin(self):
