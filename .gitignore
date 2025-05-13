@@ -63,7 +63,7 @@ db.sqlite3-journal
 *.sqlite
 *.sqlite*
 mydb.sqlite3
-mydb.sqlite
+
 
 # Flask stuff:
 instance/
